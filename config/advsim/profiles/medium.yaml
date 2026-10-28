@@ -1,0 +1,16 @@
+# 200 advertisers, ~475k business rows, ~180M stored event rows for Jan..Oct. Use --workers 4.
+clients:
+  advertisers: 200
+  holding_groups: 15
+supply:
+  publishers: 60
+  tech_partners: 14
+  production_vendors: 10
+audiences:
+  segments: 150
+  personas: 40
+org:
+  employees: 250
+  cost_centers: 30
+delivery:
+  sample_rate: 200

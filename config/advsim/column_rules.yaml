@@ -1,0 +1,14 @@
+# Per-column overrides for the generic filler, keyed "<table>.<column>".
+#   fill: probability that a nullable column gets a value
+#   p_true: probability of true for a boolean
+#   choices: {value: weight} instead of the inferred value list
+#   const: fixed value
+advertiser.preferred_currency: {const: USD}
+advertiser.language_preference: {choices: {en-US: 0.9, es-US: 0.06, fr-CA: 0.04}}
+advertiser.reporting_cadence: {choices: {weekly: 0.5, monthly: 0.3, bi-weekly: 0.15, daily: 0.05}}
+advertiser.churn_date: {fill: 0}
+brand.discontinuation_date: {fill: 0}
+agreement.termination_date: {fill: 0}
+agreement.termination_reason: {fill: 0}
+campaign.frequency_cap_window: {choices: {day: 0.4, week: 0.45, month: 0.1, hour: 0.05}}
+impression_event.consent_status: {choices: {granted: 0.78, not_required: 0.12, denied: 0.04, unknown: 0.06}}

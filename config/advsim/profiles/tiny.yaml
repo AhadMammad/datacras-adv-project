@@ -1,0 +1,8 @@
+# Seconds to build: for tests, demos and trying out changes.
+org: {employees: 20, cost_centers: 6}
+clients: {advertisers: 6, holding_groups: 1}
+supply: {publishers: 7, tech_partners: 5, production_vendors: 2, data_suppliers: 1}
+audiences: {segments: 12, personas: 4, members_per_segment: [5, 10]}
+campaigns: {per_advertiser_per_month: 0.5}
+delivery: {sample_rate: 20000}
+generic: {rows_per_table: 5}

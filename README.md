@@ -60,17 +60,20 @@ Requirements: Docker, [uv](https://docs.astral.sh/uv/), and Node.js (only for di
 validation).
 
 ```bash
-uv sync                    # install the generator
+uv sync                    # install the workspace (advgen + advsim)
 uv run advgen build        # regenerate every artifact from source/ + overrides/
-uv run pytest              # coverage tests (all MVM attributes, relationships, enums mapped)
-scripts/verify.sh          # 6 PostgreSQL 18 instances: deploy DDL, check counts, smoke test
+uv run pytest              # model coverage tests + simulator offline tests
+scripts/verify.sh          # 6 PostgreSQL 18 instances: deploy DDL, check counts, CDC, smoke test
 ```
 
 `verify.sh` recreates each database and applies `ddl/000`–`095` in order with `ON_ERROR_STOP`. It
 then compares the object counts with `models/physical/manifest.json` and runs `tests/smoke/<db>.sql`.
 The smoke test inserts one valid row into every table and checks the audit trigger, rejection of
-FK and CHECK violations, and monthly partition routing; it rolls everything back. Pass `--keep` to
-leave the containers running.
+FK and CHECK violations, and monthly partition routing; it rolls everything back. It also checks that
+each database has its CDC publication (`<db>_cdc`, `ddl/095`) and runs with `wal_level=logical`.
+Pass `--keep` to leave the containers running. If the containers were created before
+`wal_level=logical` was added to `docker-compose.yml`, recreate them once with
+`docker compose up -d --force-recreate` (the volumes are kept).
 
 To deploy one database to an existing server by hand:
 
@@ -85,6 +88,70 @@ Optional checks on the docs:
 npx -p @dbml/cli dbml2sql --postgres models/physical/crm_db/crm_db.dbml   # DBML parses
 npx -p @mermaid-js/mermaid-cli mmdc -i models/logical/crm_db.md -o /tmp/out.md   # ERDs render
 ```
+
+## Simulating data
+
+`advsim` fills the six databases with fake but realistic, mutually consistent data: an agency with
+its staff, cost centers and chart of accounts; clients with brands, contracts, SOWs and rate cards;
+publishers and tech partners; audiences; and, month by month, campaigns that flow from brief to
+plan, IOs, flights, line items, creative production, ad delivery, client billing, vendor invoices,
+payables, payments and reconciliation. Cross-database references (for example
+`media_ops_db.campaign.advertiser_id` -> `crm_db.client.advertiser`) always point at rows that exist.
+
+```bash
+scripts/verify.sh --keep                                   # databases up, DDL deployed
+uv run advsim backfill --profile small --reset             # history from 2026-01-01 until now
+uv run advsim validate                                     # soft refs resolve, business invariants hold
+uv run advsim stats                                        # row counts per database/table
+uv run advsim run --profile small --speed 60               # live activity until Ctrl-C (or --duration 2h)
+```
+
+**Backfill** builds the world in memory, loads it in foreign-key order with `COPY`, and then writes
+ad-server events day by day. Pass `--seed` for reproducible output, `--start`/`--end` for another
+window, `--workers N` to load events in parallel processes, and `--dry-run` to build without
+writing anything.
+
+**Run** reloads the current state from the databases and then, every second, inserts impressions,
+clicks, video and conversion events for live line items. It moves statuses along their lifecycles
+(UPDATEs), creates new advertisers, suppliers and campaigns, invoices the previous month, and
+deletes rows that real systems delete (draft time entries, expired segment members and similar).
+`--speed N` makes N times as much happen per second. **Timestamps are always wall-clock**, so
+`created_at`/`updated_at` (set by the audit trigger) stay consistent with what CDC sees.
+
+**Event sampling.** Budgets, spend, pacing and invoices are realistic (millions of dollars), so
+storing every impression would mean billions of rows. Each stored event row stands for
+`delivery.sample_rate` real events (small: 2,000; medium: 200; large: 1,000). `delivery_pacing`
+and `viewability_measurement` carry the real totals, so the event count multiplied by the sample
+rate approximately equals the pacing totals.
+
+Measured for 2026-01-01 to 2026-10-28 with the default seed (`large` was not measured):
+
+| Profile | Advertisers | Business rows | Stored event rows |
+|---|---|---|---|
+| `tiny` | 6 | ~8k | ~30k (tests and demos) |
+| `small` | 30 | ~64k | ~2.3M |
+| `medium` | 200 | ~475k | ~180M (use `--workers 4`) |
+| `large` | 1,000 | ~2.4M (extrapolated) | ~200M (extrapolated; use `--workers 8`) |
+
+**Data-quality noise** is off by default. Turn it on per run (`--dq late_events=0.02 --dq
+duplicate_events=0.01 --dq orphan_refs=0.005`) or in a profile; see
+[config/advsim/dq.yaml](config/advsim/dq.yaml). Validate a noisy run with
+`advsim validate --orphan-tolerance 0.01`.
+
+| File | Controls |
+|---|---|
+| `config/advsim/profiles/*.yaml` | Volumes, prices (CPM, CTR, CVR), pacing, payment lags, stream rates; `base.yaml` holds the defaults |
+| `config/advsim/lifecycles.yaml` | Status state machines: status per date phase (backfill) and transitions and dwell times (stream) |
+| `config/advsim/column_rules.yaml` | Per-column overrides for the generic filler (fill rate, fixed values, weighted choices) |
+| `config/advsim/dq.yaml` | Data-quality noise rates |
+
+How it works: [packages/advsim](packages/advsim) reads the same intermediate model as `advgen`
+(columns, types, CHECKs, code sets, references), so every column of all 95 tables gets a valid
+value. A generic filler derives values from column names and constraints, and keeps references
+coherent through a row context: a campaign's line items, ads, invoices and events all point at the
+same advertiser, brand and campaign. Hand-written scenarios in `src/advsim/scenarios/` set the
+values that carry business meaning (keys, names, money, dates, statuses). `uv run pytest -m pg`
+runs the end-to-end test against the databases; it **truncates** them.
 
 ## Changing the model
 
@@ -101,5 +168,17 @@ Everything under `models/`, `dictionary/` and `mapping/` (apart from the concept
 | `overrides/defect_fixes.yaml` | Added columns and corrected MVM descriptions |
 | `overrides/type_overrides.yaml` | Explicit PostgreSQL types |
 
-The generator lives in [generator/advgen](generator/advgen): `build.py` builds the intermediate model
+The generator lives in [packages/advgen](packages/advgen/src/advgen): `build.py` builds the intermediate model
 and the `emit_*.py` modules write the artifacts. The source MVM is pinned in [source/mvm](source/mvm/SOURCE.md).
+
+## Repository layout
+
+```
+packages/advgen/     model generator (MVM + overrides -> DDL, docs, dictionary, mapping)
+packages/advsim/     data simulator (backfill + continuous), uses advgen's model
+config/advsim/       simulator profiles, lifecycles, column rules, data-quality noise
+overrides/           model generator inputs
+models/ dictionary/ mapping/   generated model artifacts
+source/mvm/          pinned Databricks Advertising MVM
+scripts/verify.sh    deploy + verify all six databases
+```

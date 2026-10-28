@@ -1,0 +1,55 @@
+# Status state machines, refining what advsim infers from each status value list.
+#   phases: status weights for rows whose dates lie in the future / now / past (backfill)
+#   transitions: allowed next statuses; the first is the usual path (stream)
+#   dwell_hours: typical time in a status before it moves on (divided by --speed)
+campaign:
+  phases:
+    future: {draft: 0.25, approved: 0.75}
+    current: {active: 0.93, paused: 0.07}
+    past: {completed: 0.94, cancelled: 0.06}
+  transitions: {draft: [approved, cancelled], approved: [active, cancelled], active: [completed, paused],
+                paused: [active, cancelled], completed: [], cancelled: []}
+  dwell_hours: {draft: 48, approved: 72, active: 720, paused: 48}
+flight:
+  phases:
+    future: {scheduled: 0.8, draft: 0.2}
+    current: {active: 0.95, paused: 0.05}
+    past: {completed: 0.96, cancelled: 0.04}
+  transitions: {draft: [scheduled], scheduled: [active, cancelled], active: [completed, paused],
+                paused: [active, cancelled], completed: [], cancelled: []}
+  dwell_hours: {draft: 24, scheduled: 96, active: 480, paused: 24}
+client_brief:
+  phases:
+    future: {submitted: 0.5, approved: 0.5}
+    current: {in_progress: 0.9, on_hold: 0.1}
+    past: {closed: 1.0}
+  transitions: {draft: [submitted], submitted: [approved], approved: [in_progress], in_progress: [closed, on_hold],
+                on_hold: [in_progress], closed: []}
+time_entry:
+  phases:
+    future: {draft: 1.0}
+    current: {submitted: 0.3, approved: 0.7}
+    past: {approved: 0.95, rejected: 0.03, pending_revision: 0.02}
+  transitions: {draft: [submitted], submitted: [approved, rejected, pending_revision], pending_revision: [submitted],
+                approved: [], rejected: []}
+  dwell_hours: {draft: 24, submitted: 48, pending_revision: 24}
+task:
+  phases:
+    future: {not_started: 1.0}
+    current: {in_progress: 0.85, blocked: 0.05, on_hold: 0.1}
+    past: {complete: 0.95, cancelled: 0.05}
+  transitions: {not_started: [in_progress], in_progress: [complete, blocked], blocked: [in_progress],
+                on_hold: [in_progress, cancelled], complete: [], cancelled: []}
+line_item:
+  transitions: {scheduled: [delivering], delivering: [completed, under_delivering, paused],
+                under_delivering: [delivering, completed], over_delivering: [delivering, completed],
+                paused: [delivering, stopped], completed: [], stopped: []}
+  dwell_hours: {scheduled: 72, delivering: 240, under_delivering: 48, over_delivering: 24, paused: 24}
+client_invoice:
+  transitions: {draft: [issued], issued: [sent], sent: [paid, partially_paid, overdue, disputed],
+                partially_paid: [paid], overdue: [paid], disputed: [paid, cancelled], paid: [], cancelled: []}
+  dwell_hours: {default: 240}
+vendor_payable:
+  transitions: {open: [scheduled, disputed, on_hold], scheduled: [paid], disputed: [scheduled, cancelled],
+                on_hold: [open], paid: [], cancelled: []}
+  dwell_hours: {default: 240}

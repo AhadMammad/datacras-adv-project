@@ -1,0 +1,19 @@
+# 1000 advertisers. ~200M stored event rows for Jan..Oct (extrapolated from medium, not measured).
+# Use --workers 8 and plenty of disk.
+clients:
+  advertisers: 1000
+  holding_groups: 60
+supply:
+  publishers: 200
+  tech_partners: 25
+  production_vendors: 30
+  data_suppliers: 8
+audiences:
+  segments: 400
+  personas: 80
+org:
+  employees: 900
+  cost_centers: 60
+delivery:
+  sample_rate: 1000
+  max_events_per_day: 4000000

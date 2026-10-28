@@ -1,0 +1,10 @@
+# Data-quality noise. Everything is off (0) by default; enable per run with
+#   advsim backfill --dq late_events=0.02 --dq duplicate_events=0.01 ...
+# or under `dq:` in a profile. Noise never violates database constraints.
+late_events: 0.0           # share of events ingested late (ingestion_timestamp hours/days after the event)
+late_max_hours: 72
+duplicate_events: 0.0      # share of events re-sent as a second row (new id, same payload)
+orphan_refs: 0.0           # share of optional soft references pointing at ids that do not exist
+null_gaps: 0.0             # extra share of optional columns left NULL
+out_of_order_updates: 0.0  # stream: share of status updates that move a row backwards
+status_regressions: 0.0    # backfill: share of rows whose status contradicts their dates

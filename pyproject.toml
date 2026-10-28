@@ -14,4 +14,5 @@ advsim = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "packages/advsim/tests"]
-markers = ["pg: needs the six PostgreSQL instances (docker compose up)"]
+markers = ["pg: needs the six PostgreSQL instances and TRUNCATES them; run with `pytest -m pg`"]
+addopts = "-m 'not pg'"
