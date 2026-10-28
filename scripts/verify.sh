@@ -4,7 +4,8 @@
 #   2. (re)creates each database from 000_database.sql
 #   3. applies ddl/010..090 with ON_ERROR_STOP
 #   4. asserts table/column/FK counts against models/physical/manifest.json
-#   5. runs the smoke test (one valid row per table, audit trigger, partition routing; rolled back)
+#   5. checks the CDC publication and wal_level=logical
+#   6. runs the smoke test (one valid row per table, audit trigger, partition routing; rolled back)
 # Usage: scripts/verify.sh [--keep]   (--keep leaves the containers running)
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -47,6 +48,15 @@ for db in $(python3 -c "import json;print(' '.join(json.load(open('$MANIFEST'))[
     echo "   counts ok (tables columns fks ref_tables): $actual"
   else
     echo "   COUNT MISMATCH expected [$expected] actual [$actual]"; fail=1
+  fi
+
+  cdc=$(psql_in "$svc" "$db" -At \
+          -c "SELECT count(*) FROM pg_publication WHERE pubname = '${db}_cdc' AND puballtables" \
+          -c "SHOW wal_level" | tr '\n' ' ')
+  if [[ "$cdc" == "1 logical " ]]; then
+    echo "   cdc ok (publication ${db}_cdc, wal_level=logical)"
+  else
+    echo "   CDC NOT READY: [$cdc]"; fail=1
   fi
 
   if psql_in "$svc" "$db" < "tests/smoke/$db.sql"; then

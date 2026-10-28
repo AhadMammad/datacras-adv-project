@@ -66,7 +66,7 @@ uv run pytest              # coverage tests (all MVM attributes, relationships, 
 scripts/verify.sh          # 6 PostgreSQL 18 instances: deploy DDL, check counts, smoke test
 ```
 
-`verify.sh` recreates each database and applies `ddl/000`–`090` in order with `ON_ERROR_STOP`. It
+`verify.sh` recreates each database and applies `ddl/000`–`095` in order with `ON_ERROR_STOP`. It
 then compares the object counts with `models/physical/manifest.json` and runs `tests/smoke/<db>.sql`.
 The smoke test inserts one valid row into every table and checks the audit trigger, rejection of
 FK and CHECK violations, and monthly partition routing; it rolls everything back. Pass `--keep` to

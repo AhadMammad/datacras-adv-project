@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import re
 from collections import Counter, OrderedDict
 from pathlib import Path
@@ -10,7 +11,18 @@ import yaml
 
 from .model import Check, CodeSet, Column, Decision, Model, Ref, System, Table
 
-ROOT = Path(__file__).resolve().parents[2]
+
+def find_root() -> Path:
+    """Repository root: $ADV_ROOT, else the nearest ancestor holding overrides/ and source/mvm."""
+    if env := os.environ.get("ADV_ROOT"):
+        return Path(env).resolve()
+    for d in Path(__file__).resolve().parents:
+        if (d / "overrides").is_dir() and (d / "source" / "mvm").is_dir():
+            return d
+    raise RuntimeError("repository root not found; set ADV_ROOT")
+
+
+ROOT = find_root()
 SOURCE = ROOT / "source" / "mvm"
 OVERRIDES = ROOT / "overrides"
 SOURCE_SHA = "a50067f486b69e1e09603fa39ae5feac031cd702"

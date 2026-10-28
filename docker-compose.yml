@@ -3,6 +3,8 @@
 # (see scripts/verify.sh), not by POSTGRES_DB.
 x-pg: &pg
   image: postgres:18
+  # wal_level=logical enables change data capture (publication <db>_cdc, ddl/095).
+  command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=10", "-c", "max_wal_senders=10"]
   environment:
     POSTGRES_PASSWORD: ${PGPASSWORD:-postgres}
   healthcheck:

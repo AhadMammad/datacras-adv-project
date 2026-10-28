@@ -1,22 +1,17 @@
-[project]
-name = "advgen"
-version = "0.1.0"
-description = "Generates PostgreSQL source-system OLTP models from the Databricks Advertising MVM lakehouse model"
-requires-python = ">=3.12"
-dependencies = ["pyyaml>=6.0"]
+# uv workspace root (virtual). Members live under packages/.
+#   advgen: generates the OLTP source-system models from the Advertising MVM
+#   advsim: simulates realistic data into the six source databases
 
-[project.scripts]
-advgen = "advgen.cli:main"
+[tool.uv.workspace]
+members = ["packages/*"]
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "advgen", "advsim"]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["generator/advgen"]
+[tool.uv.sources]
+advgen = { workspace = true }
+advsim = { workspace = true }
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "packages/advsim/tests"]
+markers = ["pg: needs the six PostgreSQL instances (docker compose up)"]

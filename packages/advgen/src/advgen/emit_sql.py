@@ -189,6 +189,12 @@ def emit_system(model: Model, s: System, out: Path, window: tuple[str, int]) -> 
 
     files["090_comments.sql"] = head + comments(model, s)
 
+    files["095_publication.sql"] = head + (
+        f"-- Logical-replication publication for change data capture into the lakehouse.\n"
+        f"-- Requires wal_level=logical (see docker-compose.yml). Partition changes are published\n"
+        f"-- under their parent table.\n"
+        f"CREATE PUBLICATION {s.database}_cdc FOR ALL TABLES WITH (publish_via_partition_root = true);\n")
+
     for name, text in files.items():
         (ddl / name).write_text(text)
     return sorted(files)
