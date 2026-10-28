@@ -1,0 +1,25 @@
+# NOT NULL inference (strict mode). Order of precedence, last wins:
+#   1. default nullable
+#   2. PK, audit columns, partition keys -> NOT NULL
+#   3. table_rules.yaml unique/required/status columns -> NOT NULL
+#   4. parent FKs (description matches parent_fk_pattern, not an
+#      LLM-generated cross-domain link, not a self-reference) -> NOT NULL
+#   5. booleans -> NOT NULL DEFAULT false
+#   6. description matches nullable_hint_pattern -> nullable (rules 4-5 only)
+#   7. force_not_null / force_nullable below
+
+parent_fk_pattern: '^(Reference to the parent|Foreign key (linking|reference) to the parent|Identifier of the parent|Reference to the (owning|specific|associated))'
+parent_fk_exclude_pattern: '(\bnull\b|if applicable|optional|when |if this|if the|where applicable|may be)'
+boolean_nullable_pattern: '(\bnull\b|unknown|not yet (determined|assessed|known))'
+nullable_hint_pattern: '(\bnullable\b|\bnull (for|when|if|until|unless)\b|\bpopulated only\b|\bonly (populated|applicable|set) when\b|\bif applicable\b)'
+
+# <mvm_domain>.<mvm_product>.<oltp_column>: reason
+force_not_null: {}
+force_nullable:
+  campaign.budget_allocation.flight_id: Allocations can be made at campaign level, before flights exist.
+  campaign.budget_allocation.line_item_id: Allocations can be made at campaign or flight level.
+  campaign.trafficking_order.flight_id: An order may be issued for the whole campaign rather than one flight.
+  media.plan_line.media_placement_id: Plan lines are created during planning, before a placement is bought.
+  performance.tracking_pixel.media_placement_id: Conversion pixels are advertiser-level tags, not tied to one placement.
+  performance.delivery_pacing.media_placement_id: Pacing is tracked per line item or per placement, not always both.
+  finance.invoice_line.media_placement_id: Invoice lines also bill fees and production, which have no placement.

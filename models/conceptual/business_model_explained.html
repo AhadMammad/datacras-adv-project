@@ -1,0 +1,428 @@
+<title>Agency Business Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #1b2230;
+  --muted: #5b6577;
+  --line: #d3d9e2;
+  --edge: #6f7a8c;
+  --crm: #2563c9;
+  --med: #c8561f;
+  --wrk: #7b48c0;
+  --ads: #b8325f;
+  --cdp: #148274;
+  --erp: #5a7a12;
+  --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+  --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #10141b;
+    --surface: #171c25;
+    --ink: #e6e9ef;
+    --muted: #9aa3b2;
+    --line: #313946;
+    --edge: #8e98a9;
+    --crm: #7aa7f0;
+    --med: #f0935f;
+    --wrk: #b690f0;
+    --ads: #ee80a7;
+    --cdp: #4fc8b6;
+    --erp: #a9cb5c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #10141b;
+  --surface: #171c25;
+  --ink: #e6e9ef;
+  --muted: #9aa3b2;
+  --line: #313946;
+  --edge: #8e98a9;
+  --crm: #7aa7f0;
+  --med: #f0935f;
+  --wrk: #b690f0;
+  --ads: #ee80a7;
+  --cdp: #4fc8b6;
+  --erp: #a9cb5c;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.6 var(--sans);
+  padding-inline: 16px;
+  padding-block: 40px 64px;
+}
+.wrap { max-width: 1060px; margin: 0 auto; display: grid; gap: 56px; }
+
+header { display: grid; gap: 14px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(30px, 5vw, 46px)/1.08 var(--display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font: 600 24px/1.2 var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 66ch; }
+.lede { font-size: 17px; color: var(--muted); }
+
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 8px; }
+.sys {
+  display: grid; gap: 2px; padding: 10px 12px; border-radius: 8px;
+  background: color-mix(in srgb, var(--c) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+}
+.sys b { font: 600 14px/1.3 var(--sans); color: var(--c); }
+.sys code { font: 500 12px/1.4 var(--mono); color: var(--ink); }
+.sys span { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
+section { display: grid; gap: 14px; }
+figure {
+  margin: 4px 0 0; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 10px; padding: 20px 16px 14px; display: grid; gap: 12px;
+}
+.scroll { overflow-x: auto; }
+figure svg { display: block; width: 100%; height: auto; color: var(--edge); }
+.scroll svg { min-width: 720px; }
+.scroll.tall svg { min-width: 0; max-width: 760px; margin: 0 auto; }
+figcaption { font-size: 13.5px; color: var(--muted); max-width: 80ch; }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px 28px; padding: 0; margin: 0; list-style: none; }
+.rules li { font-size: 14.5px; padding-left: 14px; border-left: 2px solid var(--line); }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+footer code, p code { font: 500 12.5px var(--mono); }
+
+/* SVG vocabulary */
+.n rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+.t { font: 600 13px var(--sans); fill: var(--ink); text-anchor: middle; }
+.t.big { font-size: 15px; }
+.s { font: 500 11px var(--mono); text-anchor: middle; fill: var(--muted); }
+.x { font: 400 11px var(--sans); fill: var(--muted); text-anchor: middle; }
+.x.l, .el.l, .s.l, .t.l { text-anchor: start; }
+.num { font: 500 10.5px var(--mono); fill: var(--muted); }
+.e { stroke: var(--edge); stroke-width: 1.5; fill: none; }
+.e.dash { stroke-dasharray: 5 4; }
+.el {
+  font: 500 11px var(--sans); fill: var(--muted); text-anchor: middle;
+  paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round;
+}
+.br { stroke: var(--muted); stroke-width: 1; fill: none; }
+.crm rect { fill: color-mix(in srgb, var(--crm) 11%, var(--surface)); stroke: var(--crm); } .crm .s { fill: var(--crm); }
+.med rect { fill: color-mix(in srgb, var(--med) 11%, var(--surface)); stroke: var(--med); } .med .s { fill: var(--med); }
+.wrk rect { fill: color-mix(in srgb, var(--wrk) 11%, var(--surface)); stroke: var(--wrk); } .wrk .s { fill: var(--wrk); }
+.ads rect { fill: color-mix(in srgb, var(--ads) 11%, var(--surface)); stroke: var(--ads); } .ads .s { fill: var(--ads); }
+.cdp rect { fill: color-mix(in srgb, var(--cdp) 11%, var(--surface)); stroke: var(--cdp); } .cdp .s { fill: var(--cdp); }
+.erp rect { fill: color-mix(in srgb, var(--erp) 11%, var(--surface)); stroke: var(--erp); } .erp .s { fill: var(--erp); }
+.lake rect { fill: color-mix(in srgb, var(--ink) 6%, var(--surface)); stroke: var(--ink); stroke-width: 1.4; }
+.hub { fill: var(--surface); stroke: var(--edge); stroke-width: 1.5; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Advertising source systems · conceptual view</div>
+  <h1>How the agency's business runs, system by system</h1>
+  <p class="lede">An advertising agency wins a client, plans a campaign, produces the creative, buys media, serves ads, measures the results and settles the money. Each step is recorded in one of six operational databases, and all six feed the analytics lakehouse.</p>
+  <div class="legend" aria-label="The six systems and their colours">
+    <div class="sys" style="--c: var(--crm)"><b>CRM</b><code>crm_db</code><span>Clients, brands, contracts · 17 tables</span></div>
+    <div class="sys" style="--c: var(--med)"><b>Media ops</b><code>media_ops_db</code><span>Campaigns, plans, buys, vendors · 27 tables</span></div>
+    <div class="sys" style="--c: var(--wrk)"><b>Work mgmt + DAM</b><code>work_mgmt_db</code><span>Projects, creative production · 19 tables</span></div>
+    <div class="sys" style="--c: var(--cdp)"><b>CDP</b><code>cdp_db</code><span>Audiences, segments · 9 tables</span></div>
+    <div class="sys" style="--c: var(--ads)"><b>Ad server</b><code>adserver_db</code><span>Impressions, clicks, conversions · 9 tables</span></div>
+    <div class="sys" style="--c: var(--erp)"><b>ERP</b><code>erp_db</code><span>Budgets, billing, payables · 14 tables</span></div>
+  </div>
+</header>
+
+<!-- 1. Lifecycle -->
+<section>
+  <h2>The life of a campaign</h2>
+  <p>Work moves left to right. The colour of each step shows the system that records it. Media ops appears twice: it holds the plan and, later, the buy.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 1060 190" role="img" aria-label="Seven steps: win and contract in CRM, brief and plan in media ops, make creative in work management, build audiences in the CDP, buy and traffic in media ops, serve and measure in the ad server, bill and reconcile in the ERP. Results loop back to planning.">
+      <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+      <g class="n crm"><rect x="7" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="17" y="38">1</text><text class="t" x="74" y="60">Win &amp; contract</text><text class="s" x="74" y="78">CRM</text>
+        <text class="x" x="74" y="96">advertiser · brand</text><text class="x" x="74" y="110">agreement · SOW</text></g>
+      <g class="n med"><rect x="159" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="169" y="38">2</text><text class="t" x="226" y="60">Brief &amp; plan</text><text class="s" x="226" y="78">Media ops</text>
+        <text class="x" x="226" y="96">campaign · flight</text><text class="x" x="226" y="110">media plan</text></g>
+      <g class="n wrk"><rect x="311" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="321" y="38">3</text><text class="t" x="378" y="60">Make creative</text><text class="s" x="378" y="78">Work mgmt</text>
+        <text class="x" x="378" y="96">project · task</text><text class="x" x="378" y="110">asset · proof</text></g>
+      <g class="n cdp"><rect x="463" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="473" y="38">4</text><text class="t" x="530" y="60">Build audiences</text><text class="s" x="530" y="78">CDP</text>
+        <text class="x" x="530" y="96">segment</text><text class="x" x="530" y="110">activation</text></g>
+      <g class="n med"><rect x="615" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="625" y="38">5</text><text class="t" x="682" y="60">Buy &amp; traffic</text><text class="s" x="682" y="78">Media ops</text>
+        <text class="x" x="682" y="96">media IO · buy</text><text class="x" x="682" y="110">placement · ad</text></g>
+      <g class="n ads"><rect x="767" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="777" y="38">6</text><text class="t" x="834" y="60">Serve &amp; measure</text><text class="s" x="834" y="78">Ad server</text>
+        <text class="x" x="834" y="96">impression · click</text><text class="x" x="834" y="110">conversion</text></g>
+      <g class="n erp"><rect x="919" y="20" width="134" height="96" rx="8"/>
+        <text class="num" x="929" y="38">7</text><text class="t" x="986" y="60">Bill &amp; reconcile</text><text class="s" x="986" y="78">ERP</text>
+        <text class="x" x="986" y="96">invoice · payable</text><text class="x" x="986" y="110">reconciliation</text></g>
+
+      <line class="e" x1="142" y1="68" x2="157" y2="68" marker-end="url(#a1)"/>
+      <line class="e" x1="294" y1="68" x2="309" y2="68" marker-end="url(#a1)"/>
+      <line class="e" x1="446" y1="68" x2="461" y2="68" marker-end="url(#a1)"/>
+      <line class="e" x1="598" y1="68" x2="613" y2="68" marker-end="url(#a1)"/>
+      <line class="e" x1="750" y1="68" x2="765" y2="68" marker-end="url(#a1)"/>
+      <line class="e" x1="902" y1="68" x2="917" y2="68" marker-end="url(#a1)"/>
+
+      <path class="e dash" d="M834,117 V152 H226 V119" marker-end="url(#a1)"/>
+      <text class="el" x="530" y="172">delivery results shape the next plan</text>
+    </svg>
+    </div>
+    <figcaption>Steps 3 and 4 usually run alongside planning. They are shown in sequence here because the buy in step 5 needs both the approved creative and the target audiences.</figcaption>
+  </figure>
+</section>
+
+<!-- 2. Landscape -->
+<section>
+  <h2>Who owns what, and who reads it</h2>
+  <p>Each business concept is mastered in exactly one system. Other systems store only its identifier, as a <em>soft reference</em> with no database constraint across the boundary. Each arrow points from the system that owns the data to the system that uses it.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 980 530" role="img" aria-label="Six systems with media ops at the centre. CRM sends advertiser, brand and SOW to media ops, brand and client brief to work management, and advertiser and client IO to the ERP. Media ops sends IO, buy and supplier to the ERP and line items, placements and ads to the ad server. The ad server sends delivered actuals to the ERP. Work management and media ops exchange campaigns and approved assets. The CDP and media ops exchange segments and campaigns. Work management sends creative assets to the ad server.">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+      <!-- edges first so boxes sit on top -->
+      <line class="e" x1="221" y1="85" x2="393" y2="85" marker-end="url(#a2)"/>
+      <line class="e" x1="759" y1="85" x2="587" y2="85" marker-end="url(#a2)"/>
+      <line class="e" x1="490" y1="214" x2="490" y2="132" marker-end="url(#a2)"/>
+      <line class="e" x1="221" y1="122" x2="393" y2="235" marker-end="url(#a2)"/>
+      <line class="e" x1="587" y1="235" x2="759" y2="122" marker-end="url(#a2)"/>
+      <line class="e" x1="125" y1="131" x2="125" y2="388" marker-end="url(#a2)"/>
+      <line class="e" x1="393" y1="294" x2="221" y2="406" marker-start="url(#a2)" marker-end="url(#a2)"/>
+      <line class="e" x1="759" y1="406" x2="587" y2="294" marker-start="url(#a2)" marker-end="url(#a2)"/>
+      <path class="e" d="M125,481 V512 H968 V85 H952" marker-end="url(#a2)"/>
+
+      <text class="el" x="307" y="77">advertiser · client IO</text>
+      <text class="el" x="673" y="77">delivered actuals</text>
+      <text class="el l" x="500" y="177">IO · buy · supplier</text>
+      <text class="el" x="306" y="182">advertiser · brand · SOW</text>
+      <text class="el" x="673" y="182">line item · placement · ad</text>
+      <text class="el l" x="135" y="262">brand · client brief</text>
+      <text class="el" x="307" y="354">campaign · approved asset</text>
+      <text class="el" x="673" y="354">segment · campaign</text>
+      <text class="el" x="546" y="508">creative assets to serve</text>
+
+      <g class="n crm"><rect x="30" y="40" width="190" height="90" rx="10"/>
+        <text class="t big" x="125" y="72">CRM</text><text class="s" x="125" y="92">crm_db</text><text class="x" x="125" y="110">Salesforce-like</text></g>
+      <g class="n erp"><rect x="395" y="40" width="190" height="90" rx="10"/>
+        <text class="t big" x="490" y="72">ERP</text><text class="s" x="490" y="92">erp_db</text><text class="x" x="490" y="110">SAP-like</text></g>
+      <g class="n ads"><rect x="760" y="40" width="190" height="90" rx="10"/>
+        <text class="t big" x="855" y="72">Ad server</text><text class="s" x="855" y="92">adserver_db</text><text class="x" x="855" y="110">CM360 / Trade Desk-like</text></g>
+      <g class="n med"><rect x="395" y="215" width="190" height="90" rx="10"/>
+        <text class="t big" x="490" y="247">Media ops</text><text class="s" x="490" y="267">media_ops_db</text><text class="x" x="490" y="285">Prisma-like · the hub</text></g>
+      <g class="n wrk"><rect x="30" y="390" width="190" height="90" rx="10"/>
+        <text class="t big" x="125" y="422">Work mgmt + DAM</text><text class="s" x="125" y="442">work_mgmt_db</text><text class="x" x="125" y="460">Workfront-like</text></g>
+      <g class="n cdp"><rect x="760" y="390" width="190" height="90" rx="10"/>
+        <text class="t big" x="855" y="422">CDP</text><text class="s" x="855" y="442">cdp_db</text><text class="x" x="855" y="460">Customer data platform</text></g>
+    </svg>
+    </div>
+    <figcaption>Media ops sits in the middle because the campaign, line item and supplier live there, and almost every other system points at them. The heaviest reference flows run from the ad server to media ops (62 references) and from the ERP to media ops (55). The full list is in <code>mapping/cross_system_refs.csv</code>.</figcaption>
+  </figure>
+</section>
+
+<!-- 3. Campaign structure -->
+<section>
+  <h2>Anatomy of a campaign</h2>
+  <p>The middle column is the chain every report rolls up through, from the client paying for the campaign down to a single conversion. The boxes at the sides are what each level gets from elsewhere.</p>
+  <figure>
+    <div class="scroll tall">
+    <svg viewBox="0 0 760 690" role="img" aria-label="Advertiser funds campaign, which runs in flights, which contain line items, which serve ads, which generate delivery events, which are credited with conversions. Advertiser owns brands. Campaigns are planned in media plans and funded by ERP budgets. Programmatic deals and CDP audience segments attach to line items. Creative assets are trafficked as ads. Delivery events are recorded at placements. Attribution models credit conversions.">
+      <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+      <!-- spine -->
+      <g class="n crm"><rect x="280" y="16" width="200" height="56" rx="8"/><text class="t" x="380" y="40">Advertiser</text><text class="s" x="380" y="58">CRM</text></g>
+      <g class="n med"><rect x="280" y="116" width="200" height="56" rx="8"/><text class="t" x="380" y="140">Campaign</text><text class="s" x="380" y="158">Media ops</text></g>
+      <g class="n med"><rect x="280" y="216" width="200" height="56" rx="8"/><text class="t" x="380" y="240">Flight</text><text class="s" x="380" y="258">Media ops</text></g>
+      <g class="n med"><rect x="280" y="316" width="200" height="56" rx="8"/><text class="t" x="380" y="340">Line item</text><text class="s" x="380" y="358">Media ops</text></g>
+      <g class="n med"><rect x="280" y="416" width="200" height="56" rx="8"/><text class="t" x="380" y="440">Ad</text><text class="s" x="380" y="458">Media ops</text></g>
+      <g class="n ads"><rect x="280" y="516" width="200" height="56" rx="8"/><text class="t" x="380" y="540">Delivery event</text><text class="s" x="380" y="558">Ad server</text></g>
+      <g class="n ads"><rect x="280" y="616" width="200" height="56" rx="8"/><text class="t" x="380" y="640">Conversion</text><text class="s" x="380" y="658">Ad server</text></g>
+
+      <line class="e" x1="380" y1="73" x2="380" y2="114" marker-end="url(#a3)"/><text class="el l" x="392" y="98">funds · one to many</text>
+      <line class="e" x1="380" y1="173" x2="380" y2="214" marker-end="url(#a3)"/><text class="el l" x="392" y="198">runs in one or more</text>
+      <line class="e" x1="380" y1="273" x2="380" y2="314" marker-end="url(#a3)"/><text class="el l" x="392" y="298">contains</text>
+      <line class="e" x1="380" y1="373" x2="380" y2="414" marker-end="url(#a3)"/><text class="el l" x="392" y="398">serves</text>
+      <line class="e" x1="380" y1="473" x2="380" y2="514" marker-end="url(#a3)"/><text class="el l" x="392" y="498">each impression, click, view</text>
+      <line class="e" x1="380" y1="573" x2="380" y2="614" marker-end="url(#a3)"/><text class="el l" x="392" y="598">credited with</text>
+
+      <!-- sides -->
+      <g class="n crm"><rect x="10" y="16" width="180" height="56" rx="8"/><text class="t" x="100" y="40">Brand</text><text class="s" x="100" y="58">CRM</text></g>
+      <line class="e" x1="279" y1="44" x2="192" y2="44" marker-end="url(#a3)"/><text class="el" x="235" y="37">owns</text>
+
+      <g class="n erp"><rect x="10" y="116" width="180" height="56" rx="8"/><text class="t" x="100" y="140">Budget</text><text class="s" x="100" y="158">ERP</text></g>
+      <line class="e" x1="191" y1="144" x2="278" y2="144" marker-end="url(#a3)"/><text class="el" x="235" y="137">funds</text>
+
+      <g class="n med"><rect x="570" y="116" width="180" height="56" rx="8"/><text class="t" x="660" y="140">Media plan</text><text class="s" x="660" y="158">Media ops</text></g>
+      <line class="e" x1="481" y1="144" x2="568" y2="144" marker-end="url(#a3)"/><text class="el" x="525" y="137">planned in</text>
+
+      <g class="n med"><rect x="10" y="316" width="180" height="56" rx="8"/><text class="t" x="100" y="340">Programmatic deal</text><text class="s" x="100" y="358">Media ops</text></g>
+      <line class="e" x1="191" y1="344" x2="278" y2="344" marker-end="url(#a3)"/><text class="el" x="235" y="337">bought via</text>
+
+      <g class="n cdp"><rect x="570" y="316" width="180" height="56" rx="8"/><text class="t" x="660" y="340">Audience segment</text><text class="s" x="660" y="358">CDP</text></g>
+      <line class="e" x1="569" y1="344" x2="482" y2="344" marker-end="url(#a3)"/><text class="el" x="525" y="337">targeted</text>
+
+      <g class="n wrk"><rect x="570" y="416" width="180" height="56" rx="8"/><text class="t" x="660" y="440">Creative asset</text><text class="s" x="660" y="458">Work mgmt</text></g>
+      <line class="e" x1="569" y1="444" x2="482" y2="444" marker-end="url(#a3)"/><text class="el" x="525" y="437">trafficked as</text>
+
+      <g class="n med"><rect x="10" y="516" width="180" height="56" rx="8"/><text class="t" x="100" y="540">Placement</text><text class="s" x="100" y="558">Media ops</text></g>
+      <line class="e" x1="191" y1="544" x2="278" y2="544" marker-end="url(#a3)"/><text class="el" x="235" y="537">recorded at</text>
+
+      <g class="n ads"><rect x="570" y="616" width="180" height="56" rx="8"/><text class="t" x="660" y="640">Attribution model</text><text class="s" x="660" y="658">Ad server</text></g>
+      <line class="e" x1="569" y1="644" x2="482" y2="644" marker-end="url(#a3)"/><text class="el" x="525" y="637">credits</text>
+    </svg>
+    </div>
+    <figcaption>A line item is the smallest unit that can be bought. It carries the budget, pacing and targeting rules, and it always belongs to exactly one flight. Advertisers also form a hierarchy among themselves: holding company → subsidiary → brand owner.</figcaption>
+  </figure>
+</section>
+
+<!-- 4. Money -->
+<section>
+  <h2>How the money is controlled</h2>
+  <p>Spend is authorised twice. The client approves it in a <em>client insertion order</em> under their agreement, and the agency commits it to a media vendor in a <em>media insertion order</em>. The vendor IO carries out the client IO.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 980 160" role="img" aria-label="Advertiser signs agreement, which governs the client insertion order in CRM. The client IO is executed by a media insertion order in media ops, which buys placements.">
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+      <g class="n crm"><rect x="11" y="50" width="150" height="60" rx="8"/><text class="t" x="86" y="76">Advertiser</text><text class="s" x="86" y="94">CRM</text></g>
+      <g class="n crm"><rect x="213" y="50" width="150" height="60" rx="8"/><text class="t" x="288" y="76">Agreement</text><text class="s" x="288" y="94">CRM · MSA</text></g>
+      <g class="n crm"><rect x="415" y="50" width="150" height="60" rx="8"/><text class="t" x="490" y="76">Client IO</text><text class="s" x="490" y="94">CRM</text></g>
+      <g class="n med"><rect x="617" y="50" width="150" height="60" rx="8"/><text class="t" x="692" y="76">Media IO</text><text class="s" x="692" y="94">Media ops</text></g>
+      <g class="n med"><rect x="819" y="50" width="150" height="60" rx="8"/><text class="t" x="894" y="76">Placement</text><text class="s" x="894" y="94">Media ops</text></g>
+
+      <line class="e" x1="162" y1="80" x2="211" y2="80" marker-end="url(#a4)"/><text class="el" x="187" y="40">signs</text>
+      <line class="e" x1="364" y1="80" x2="413" y2="80" marker-end="url(#a4)"/><text class="el" x="389" y="40">governs</text>
+      <line class="e" x1="566" y1="80" x2="615" y2="80" marker-end="url(#a4)"/><text class="el" x="591" y="40">executed by</text>
+      <line class="e" x1="768" y1="80" x2="817" y2="80" marker-end="url(#a4)"/><text class="el" x="793" y="40">buys</text>
+
+      <path class="br" d="M11,122 V128 H565 V122"/><text class="x" x="288" y="148">Client side: what the advertiser approved</text>
+      <path class="br" d="M617,122 V128 H969 V122"/><text class="x" x="793" y="148">Vendor side: what the agency committed to a supplier</text>
+    </svg>
+    </div>
+    <figcaption>The supplier (publisher or tech partner) is recorded once, in media ops. The ERP refers to that record for invoices and payments.</figcaption>
+  </figure>
+
+  <p>Before a supplier is paid, the ERP checks three independent numbers against each other: what was authorised, what the supplier invoiced, and what the ad server actually delivered.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 980 300" role="img" aria-label="Three inputs, authorised spend from the media IO, the invoiced amount from the vendor invoice and delivered actuals from ad server pacing, flow into reconciliation in the ERP. An approved reconciliation creates a vendor payable, which is paid. Reconciliation also feeds the supplier scorecard.">
+      <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+      <line class="e" x1="251" y1="52" x2="378" y2="134" marker-end="url(#a5)"/>
+      <line class="e" x1="251" y1="150" x2="378" y2="150" marker-end="url(#a5)"/>
+      <line class="e" x1="251" y1="248" x2="378" y2="166" marker-end="url(#a5)"/>
+      <text class="el" x="314" y="86">$ committed</text>
+      <text class="el" x="314" y="143">$ billed</text>
+      <text class="el" x="314" y="222">units served</text>
+
+      <g class="n med"><rect x="20" y="20" width="230" height="64" rx="8"/><text class="t" x="135" y="42">Authorised spend</text><text class="s" x="135" y="59">Media ops</text><text class="x" x="135" y="75">media insertion order</text></g>
+      <g class="n erp"><rect x="20" y="118" width="230" height="64" rx="8"/><text class="t" x="135" y="140">Invoiced amount</text><text class="s" x="135" y="157">ERP</text><text class="x" x="135" y="173">vendor invoice + IO lines</text></g>
+      <g class="n ads"><rect x="20" y="216" width="230" height="64" rx="8"/><text class="t" x="135" y="238">Delivered actuals</text><text class="s" x="135" y="255">Ad server</text><text class="x" x="135" y="271">delivery pacing</text></g>
+
+      <g class="n erp"><rect x="380" y="118" width="200" height="64" rx="8"/><text class="t" x="480" y="140">Reconciliation</text><text class="s" x="480" y="157">ERP</text><text class="x" x="480" y="173">IO vs invoice vs delivery</text></g>
+      <g class="n erp"><rect x="640" y="118" width="150" height="64" rx="8"/><text class="t" x="715" y="146">Vendor payable</text><text class="s" x="715" y="164">ERP</text></g>
+      <g class="n erp"><rect x="840" y="118" width="130" height="64" rx="8"/><text class="t" x="905" y="146">Payment</text><text class="s" x="905" y="164">ERP</text></g>
+      <g class="n erp"><rect x="380" y="232" width="200" height="56" rx="8"/><text class="t" x="480" y="256">Supplier scorecard</text><text class="s" x="480" y="273">ERP</text></g>
+
+      <line class="e" x1="581" y1="150" x2="638" y2="150" marker-end="url(#a5)"/><text class="el" x="610" y="110">approved</text>
+      <line class="e" x1="791" y1="150" x2="838" y2="150" marker-end="url(#a5)"/><text class="el" x="815" y="110">paid by</text>
+      <line class="e" x1="480" y1="183" x2="480" y2="230" marker-end="url(#a5)"/><text class="el l" x="490" y="211">feeds</text>
+    </svg>
+    </div>
+    <figcaption>On the client side, the ERP bills the advertiser with a client invoice and recognises the revenue. Budgets are owned by cost centres and fund campaigns.</figcaption>
+  </figure>
+</section>
+
+<!-- 5. Creative -->
+<section>
+  <h2>From client brief to a live ad</h2>
+  <p>Creative work moves from the client's request, through production and proofing in work management, to an approved asset that media ops traffics as an ad.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 980 325" role="img" aria-label="Client brief in CRM initiates a project, which kicks off a creative brief, which triggers a production job. The job produces an asset, which is versioned. Each version is sent for review as a proof. A proof either requests changes, producing a new version, or is approved and trafficked as an ad in media ops.">
+      <defs><marker id="a6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+      <g class="n crm"><rect x="30" y="40" width="200" height="60" rx="8"/><text class="t" x="130" y="66">Client brief</text><text class="s" x="130" y="84">CRM</text></g>
+      <g class="n wrk"><rect x="270" y="40" width="200" height="60" rx="8"/><text class="t" x="370" y="66">Project</text><text class="s" x="370" y="84">Work mgmt</text></g>
+      <g class="n wrk"><rect x="510" y="40" width="200" height="60" rx="8"/><text class="t" x="610" y="66">Creative brief</text><text class="s" x="610" y="84">Work mgmt</text></g>
+      <g class="n wrk"><rect x="750" y="40" width="200" height="60" rx="8"/><text class="t" x="850" y="66">Production job</text><text class="s" x="850" y="84">Work mgmt</text></g>
+
+      <line class="e" x1="231" y1="70" x2="268" y2="70" marker-end="url(#a6)"/><text class="el" x="250" y="30">initiates</text>
+      <line class="e" x1="471" y1="70" x2="508" y2="70" marker-end="url(#a6)"/><text class="el" x="490" y="30">kicks off</text>
+      <line class="e" x1="711" y1="70" x2="748" y2="70" marker-end="url(#a6)"/><text class="el" x="730" y="30">triggers</text>
+      <line class="e" x1="850" y1="101" x2="850" y2="198" marker-end="url(#a6)"/><text class="el l" x="860" y="154">produces</text>
+
+      <g class="n wrk"><rect x="750" y="200" width="200" height="60" rx="8"/><text class="t" x="850" y="226">Asset</text><text class="s" x="850" y="244">Work mgmt · DAM</text></g>
+      <g class="n wrk"><rect x="510" y="200" width="200" height="60" rx="8"/><text class="t" x="610" y="226">Asset version</text><text class="s" x="610" y="244">Work mgmt · DAM</text></g>
+      <g class="n wrk"><rect x="270" y="200" width="200" height="60" rx="8"/><text class="t" x="370" y="226">Proof</text><text class="s" x="370" y="244">Work mgmt</text></g>
+      <g class="n med"><rect x="30" y="200" width="200" height="60" rx="8"/><text class="t" x="130" y="226">Ad</text><text class="s" x="130" y="244">Media ops</text></g>
+
+      <line class="e" x1="749" y1="230" x2="712" y2="230" marker-end="url(#a6)"/><text class="el" x="730" y="190">versioned as</text>
+      <line class="e" x1="509" y1="230" x2="472" y2="230" marker-end="url(#a6)"/><text class="el" x="490" y="190">sent for review</text>
+      <line class="e" x1="269" y1="230" x2="232" y2="230" marker-end="url(#a6)"/><text class="el" x="250" y="190">approved → trafficked</text>
+
+      <path class="e dash" d="M370,261 C370,300 610,300 610,264" marker-end="url(#a6)"/>
+      <text class="el" x="490" y="314">changes requested → new version</text>
+    </svg>
+    </div>
+    <figcaption>Brands also own brand guidelines and specs that the creative brief must follow. Time logged against project tasks becomes billable effort.</figcaption>
+  </figure>
+</section>
+
+<!-- 6. Lakehouse -->
+<section>
+  <h2>Where the analytics come from</h2>
+  <p>None of the six systems is the reporting layer. Change data capture streams every insert and update into the Databricks lakehouse, where the systems come together in the Advertising MVM.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 820 310" role="img" aria-label="All six source databases stream changes through change data capture into the Databricks lakehouse Advertising MVM, which has 10 domains, 95 tables and 3,760 attributes.">
+      <defs><marker id="a7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+      <path class="e" d="M241,32 C340,32 340,152 430,152"/>
+      <path class="e" d="M241,80 C340,80 340,152 430,152"/>
+      <path class="e" d="M241,128 C340,128 340,152 430,152"/>
+      <path class="e" d="M241,176 C340,176 340,152 430,152"/>
+      <path class="e" d="M241,224 C340,224 340,152 430,152"/>
+      <path class="e" d="M241,272 C340,272 340,152 430,152"/>
+      <circle class="hub" cx="440" cy="152" r="10"/>
+      <line class="e" x1="451" y1="152" x2="538" y2="152" marker-end="url(#a7)"/>
+      <text class="el" x="440" y="186">change data capture</text>
+
+      <g class="n crm"><rect x="20" y="14" width="220" height="36" rx="6"/><text class="t l" x="34" y="37">CRM</text><text class="s l" x="120" y="37">crm_db</text></g>
+      <g class="n med"><rect x="20" y="62" width="220" height="36" rx="6"/><text class="t l" x="34" y="85">Media ops</text><text class="s l" x="120" y="85">media_ops_db</text></g>
+      <g class="n wrk"><rect x="20" y="110" width="220" height="36" rx="6"/><text class="t l" x="34" y="133">Work mgmt</text><text class="s l" x="120" y="133">work_mgmt_db</text></g>
+      <g class="n cdp"><rect x="20" y="158" width="220" height="36" rx="6"/><text class="t l" x="34" y="181">CDP</text><text class="s l" x="120" y="181">cdp_db</text></g>
+      <g class="n ads"><rect x="20" y="206" width="220" height="36" rx="6"/><text class="t l" x="34" y="229">Ad server</text><text class="s l" x="120" y="229">adserver_db</text></g>
+      <g class="n erp"><rect x="20" y="254" width="220" height="36" rx="6"/><text class="t l" x="34" y="277">ERP</text><text class="s l" x="120" y="277">erp_db</text></g>
+
+      <g class="n lake"><rect x="540" y="100" width="260" height="104" rx="10"/>
+        <text class="t big" x="670" y="132">Databricks lakehouse</text>
+        <text class="s" x="670" y="152">Advertising MVM (Silver)</text>
+        <text class="x" x="670" y="172">10 domains · 95 tables</text>
+        <text class="x" x="670" y="188">3,760 attributes</text></g>
+    </svg>
+    </div>
+    <figcaption>Every MVM attribute traces back to exactly one source column. The lineage is in <code>mapping/mvm_to_oltp_mapping.csv</code>.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Rules worth remembering</h2>
+  <ul class="rules">
+    <li>Every campaign belongs to one advertiser and runs in at least one flight.</li>
+    <li>A line item sits in exactly one flight and can serve many ads.</li>
+    <li>A supplier is recorded once, in media ops. The ERP only refers to it.</li>
+    <li>Audience segments are mastered in the CDP and targeted by line items.</li>
+    <li>Conversions are credited to delivery events under the advertiser's attribution model.</li>
+    <li>Links inside one database are enforced foreign keys. Links between databases are soft references.</li>
+  </ul>
+</section>
+
+<footer>Source: <code>models/conceptual/conceptual_model.md</code>. Column-level detail is in <code>dictionary/</code>, and table-level ERDs are in <code>models/physical/&lt;db&gt;/erd.md</code>.</footer>
+</div>

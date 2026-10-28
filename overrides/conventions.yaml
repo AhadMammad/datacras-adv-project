@@ -1,0 +1,65 @@
+# Model-wide physical conventions applied by the generator.
+
+# Lakehouse audit/lineage columns are normalized to one standard set.
+# The first candidate found in a table is renamed; missing ones are added.
+audit_columns:
+  created_at:
+    type: timestamptz
+    default: now()
+    candidates: [created_timestamp, record_created_timestamp, assignment_created_date]
+    description: Timestamp when the row was inserted. Set by default, immutable (enforced by audit trigger).
+  created_by:
+    type: text
+    default: audit.current_actor()
+    candidates: [created_by, created_by_user]
+    description: Application user (session setting app.actor) or database role that inserted the row. Immutable.
+  updated_at:
+    type: timestamptz
+    default: now()
+    candidates: [updated_timestamp, modified_timestamp, last_modified_timestamp, last_updated_timestamp, record_updated_timestamp, last_modified_date]
+    description: Timestamp of the last update. Maintained by the audit trigger.
+  updated_by:
+    type: text
+    default: audit.current_actor()
+    candidates: [updated_by, modified_by, modified_by_user, last_modified_by]
+    description: Application user or database role that last updated the row. Maintained by the audit trigger.
+
+# High-volume event tables: range-partitioned monthly on the given column.
+partitioning:
+  window_start: "2026-01-01"
+  window_months: 24
+  tables:
+    performance.impression_event: impression_timestamp
+    performance.click_event: click_timestamp
+    performance.video_completion_event: event_timestamp
+    performance.viewability_measurement: measurement_timestamp
+    performance.conversion_event: conversion_timestamp
+    performance.delivery_pacing: measurement_timestamp
+
+# Range checks (strict mode). Matched against column names.
+ranges:
+  percentage:
+    name_pattern: '(_pct|_percent|_percentage)$'
+    exclude_pattern: '(variance|change|lift|growth|delta|deviation|diff|increase|uplift)'
+    min: 0
+    max: 100
+  non_negative:
+    name_pattern: '(amount|cost|price|spend|budget|fee|fees|value|impressions|clicks|views|conversions|_count|count_|_size|size$|reach|units|quantity|hours|minutes|seconds|_days|_bytes|_cpm|_cpc|_cpa|cpm$|cpc$|cpa$|_rate$|_goal|_cap|population|visitors|duration)'
+    exclude_pattern: '(variance|adjust|discrepan|delta|diff|change|net_|balance|credit|offset|gain|loss|lift|growth|margin|deviation|score|latitude|longitude|utc|index|rating|_id$)'
+    min: 0
+
+# Pairs of date/timestamp columns that must be ordered (end >= start).
+date_pairs:
+  start_tokens: [start, begin]
+  end_token: end
+
+# Descriptions are cleaned for an OLTP context.
+description_cleanup:
+  - pattern: '\s*\[ENUM-REF-CANDIDATE:[^\]]*\]'
+    replace: ''
+  - pattern: '\.?\s*Valid values are `[^`]*`\.?'
+    replace: '.'
+  - pattern: '\s+(in|from|within) the (lakehouse )?[Ss]ilver [Ll]ayer( lakehouse)?'
+    replace: ''
+  - pattern: '\s+in the lakehouse'
+    replace: ''

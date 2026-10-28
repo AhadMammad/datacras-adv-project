@@ -1,0 +1,69 @@
+# Which source system (PostgreSQL instance + database) owns each MVM table.
+# Rules are evaluated top to bottom; the first match wins. A rule without
+# `subdomain` matches every subdomain of the domain.
+
+systems:
+  crm:
+    database: crm_db
+    service: pg-crm
+    port: 5433
+    mimics: Salesforce Sales Cloud (CRM)
+    description: >-
+      Advertiser identity, brands, account teams, client briefs and every
+      commercial agreement (MSA, SOW, SLA, rate cards, client-side IOs).
+  erp:
+    database: erp_db
+    service: pg-erp
+    port: 5434
+    mimics: SAP S/4HANA (FI/CO, AP/AR)
+    description: >-
+      Finance master data (cost centers, GL accounts, budgets), client
+      invoicing, revenue recognition, payments, vendor invoices, payables and
+      media cost reconciliation.
+  media_ops:
+    database: media_ops_db
+    service: pg-media-ops
+    port: 5435
+    mimics: Mediaocean Prisma (media planning and buying)
+    description: >-
+      Campaign structure, media plans, placements, buys, insertion orders,
+      programmatic deals, trafficking and the vendor/publisher registry with
+      rate cards.
+  work_mgmt:
+    database: work_mgmt_db
+    service: pg-work-mgmt
+    port: 5436
+    mimics: Adobe Workfront + DAM
+    description: >-
+      Agency projects, work breakdown, tasks, time entries, and the creative
+      production lifecycle from brief to approved asset.
+  adserver:
+    database: adserver_db
+    service: pg-adserver
+    port: 5437
+    mimics: Google CM360 / The Trade Desk (ad serving and measurement)
+    description: >-
+      Raw delivery events (impressions, clicks, video quartiles, viewability,
+      conversions), pacing snapshots, tracking pixels, attribution models and
+      performance KPI targets.
+  cdp:
+    database: cdp_db
+    service: pg-cdp
+    port: 5438
+    mimics: Customer Data Platform / DMP
+    description: >-
+      Audience taxonomy, segments, profiles, personas, lookalike models,
+      segment membership, suppression lists and activations to platforms.
+
+rules:
+  - {domain: client, system: crm}
+  - {domain: contract, system: crm}
+  - {domain: finance, system: erp}
+  - {domain: vendor, subdomain: billing_reconciliation, system: erp}
+  - {domain: vendor, subdomain: vendor_registry, system: media_ops}
+  - {domain: media, system: media_ops}
+  - {domain: campaign, system: media_ops}
+  - {domain: project, system: work_mgmt}
+  - {domain: creative, system: work_mgmt}
+  - {domain: performance, system: adserver}
+  - {domain: audience, system: cdp}

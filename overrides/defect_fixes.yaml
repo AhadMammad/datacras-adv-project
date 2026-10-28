@@ -1,0 +1,40 @@
+# Corrections to defects found in the MVM. Every entry is copied into
+# mapping/decision_log.md. Keys: <mvm_domain>.<mvm_product>[.<column>].
+
+add_columns:
+  client.brand:
+    - name: parent_brand_id
+      type: uuid
+      ref: client.brand
+      description: Parent brand when this brand is a sub-brand or brand extension (e.g. Dove Men+Care under Dove). Null for top-level brands.
+      reason: The MVM describes brand_id as both the primary key and the parent-brand self-reference, so the brand hierarchy had no column of its own.
+
+  media.placement:
+    # The MVM ships media.placement as a 3-column stub (PK + 2 FKs) although
+    # its product description lists placement-level attributes. They are
+    # added here, derived from that description.
+    - {name: ad_format_id, type: uuid, ref: media.ad_format, description: Default ad format sold in this placement position., reason: Stub completion from product description}
+    - {name: placement_code, type: text, description: Business code uniquely identifying the placement position across ad server and DSP setups., reason: Stub completion from product description}
+    - {name: placement_name, type: text, description: Human-readable placement position name (e.g. Homepage Leaderboard 728x90)., reason: Stub completion from product description}
+    - {name: position_type, type: text, values: [header, sidebar, in_content, footer, interstitial, pre_roll, mid_roll, post_roll, sponsored_post, screen, other], description: Position type of the placement within the property., reason: Stub completion from product description}
+    - {name: fold_position, type: text, values: [above_fold, below_fold, not_applicable], description: Above or below the fold classification for display placements., reason: Stub completion from product description}
+    - {name: viewability_rate_benchmark_pct, type: 'numeric(5,2)', description: Historical MRC viewability rate benchmark for this placement (0-100)., reason: Stub completion from product description}
+    - {name: cpm_floor_price, type: 'numeric(18,2)', description: Minimum CPM accepted for this placement., reason: Stub completion from product description}
+    - {name: floor_price_currency_code, type: char(3), regex: '^[A-Z]{3}$', description: ISO 4217 currency of the CPM floor price., reason: Stub completion from product description}
+    - {name: estimated_monthly_reach, type: bigint, description: Estimated monthly unique audience reach of the placement., reason: Stub completion from product description}
+    - {name: cm360_placement_code, type: text, description: Placement identifier in Google Campaign Manager 360., reason: Stub completion from product description}
+    - {name: ttd_inventory_code, type: text, description: Inventory/placement identifier in The Trade Desk., reason: Stub completion from product description}
+    - {name: trafficking_requirements, type: text, description: Platform-specific trafficking requirements (tags, macros, file limits)., reason: Stub completion from product description}
+    - {name: placement_status, type: text, values: [active, paused, inactive, retired], description: Lifecycle status of the placement position., reason: Stub completion from product description}
+
+  media.media_insertion_order:
+    - name: contract_insertion_order_id
+      type: uuid
+      ref: contract.contract_insertion_order
+      description: The client-side contractual IO (CRM) that this vendor-facing media IO executes.
+      reason: The MVM keeps two overlapping IO entities (media.media_insertion_order and contract.contract_insertion_order) with no link between them. Each stays in its own system, linked by this soft reference.
+
+fix_descriptions:
+  client.brand.brand_id:
+    description: Unique identifier for the brand. Primary key.
+    business_name: Brand ID

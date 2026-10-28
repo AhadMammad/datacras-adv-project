@@ -1,0 +1,14 @@
+# Lookup (reference) tables generated from the MVM [ENUM-REF-CANDIDATE] columns.
+#
+# Scope: one code set per (system, column name). When the same column name
+# carries different candidate lists in different tables of one system, the
+# code set holds the union of the values (e.g. media_ops channel_type).
+# Tables live in schema `ref` of each database: ref.<code_set>.
+
+label_acronyms: [ad, ai, api, aor, b2b, b2c, cdp, cm360, cpa, cpc, cpcv, cpe, cpi, cpl, cpm, cpv, crm,
+  ctr, ctv, dam, dmp, dooh, dsp, ftp, gdpr, grp, html5, iab, io, kpi, mmm, mrc, msa, nps, ooh,
+  ott, pg, pmp, ppc, pr, qa, rfp, roas, rtb, sem, seo, sftp, sla, sms, sov, sow, ssp, tag, trp,
+  tv, ugc, uk, us, usd, vast, vpaid, vtr, wbs]
+
+# Extra values appended to a code set: {system: {code_set: [values]}}
+extra_values: {}

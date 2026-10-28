@@ -1,0 +1,84 @@
+{
+  "source_commit": "a50067f486b69e1e09603fa39ae5feac031cd702",
+  "systems": {
+    "crm_db": {
+      "system": "crm",
+      "service": "pg-crm",
+      "port": 5433,
+      "mimics": "Salesforce Sales Cloud (CRM)",
+      "tables": 17,
+      "columns": 687,
+      "foreign_keys": 92,
+      "soft_refs": 36,
+      "ref_tables": 29,
+      "partitioned_tables": []
+    },
+    "erp_db": {
+      "system": "erp",
+      "service": "pg-erp",
+      "port": 5434,
+      "mimics": "SAP S/4HANA (FI/CO, AP/AR)",
+      "tables": 14,
+      "columns": 627,
+      "foreign_keys": 53,
+      "soft_refs": 120,
+      "ref_tables": 14,
+      "partitioned_tables": []
+    },
+    "media_ops_db": {
+      "system": "media_ops",
+      "service": "pg-media-ops",
+      "port": 5435,
+      "mimics": "Mediaocean Prisma (media planning and buying)",
+      "tables": 27,
+      "columns": 1089,
+      "foreign_keys": 172,
+      "soft_refs": 95,
+      "ref_tables": 39,
+      "partitioned_tables": []
+    },
+    "work_mgmt_db": {
+      "system": "work_mgmt",
+      "service": "pg-work-mgmt",
+      "port": 5436,
+      "mimics": "Adobe Workfront + DAM",
+      "tables": 19,
+      "columns": 756,
+      "foreign_keys": 105,
+      "soft_refs": 95,
+      "ref_tables": 19,
+      "partitioned_tables": []
+    },
+    "adserver_db": {
+      "system": "adserver",
+      "service": "pg-adserver",
+      "port": 5437,
+      "mimics": "Google CM360 / The Trade Desk (ad serving and measurement)",
+      "tables": 9,
+      "columns": 425,
+      "foreign_keys": 11,
+      "soft_refs": 112,
+      "ref_tables": 6,
+      "partitioned_tables": [
+        "performance.conversion_event",
+        "performance.click_event",
+        "performance.delivery_pacing",
+        "performance.impression_event",
+        "performance.video_completion_event",
+        "performance.viewability_measurement"
+      ]
+    },
+    "cdp_db": {
+      "system": "cdp",
+      "service": "pg-cdp",
+      "port": 5438,
+      "mimics": "Customer Data Platform / DMP",
+      "tables": 9,
+      "columns": 349,
+      "foreign_keys": 26,
+      "soft_refs": 41,
+      "ref_tables": 6,
+      "partitioned_tables": []
+    }
+  }
+}

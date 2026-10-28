@@ -1,0 +1,7 @@
+# Explicit PostgreSQL type overrides, applied after the default type mapping
+# (see README "Type mapping"). Key: <mvm_domain>.<mvm_product>.<column>.
+
+overrides:
+  vendor.vendor_rate_card.source_system_rate_card_vendor_rate_card_id:
+    pg_type: uuid
+    reason: Self-referencing FK typed STRING in the MVM (the only non-BIGINT key); all keys are uuid in the OLTP.

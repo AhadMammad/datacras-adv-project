@@ -1,0 +1,46 @@
+# Six physically separate PostgreSQL instances, one per source system.
+# Databases are created by models/physical/<db>/ddl/000_database.sql
+# (see scripts/verify.sh), not by POSTGRES_DB.
+x-pg: &pg
+  image: postgres:18
+  environment:
+    POSTGRES_PASSWORD: ${PGPASSWORD:-postgres}
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    interval: 2s
+    timeout: 3s
+    retries: 30
+
+services:
+  pg-crm:
+    <<: *pg
+    ports: ["5433:5432"]
+    volumes: [pg-crm:/var/lib/postgresql]
+  pg-erp:
+    <<: *pg
+    ports: ["5434:5432"]
+    volumes: [pg-erp:/var/lib/postgresql]
+  pg-media-ops:
+    <<: *pg
+    ports: ["5435:5432"]
+    volumes: [pg-media-ops:/var/lib/postgresql]
+  pg-work-mgmt:
+    <<: *pg
+    ports: ["5436:5432"]
+    volumes: [pg-work-mgmt:/var/lib/postgresql]
+  pg-adserver:
+    <<: *pg
+    ports: ["5437:5432"]
+    volumes: [pg-adserver:/var/lib/postgresql]
+  pg-cdp:
+    <<: *pg
+    ports: ["5438:5432"]
+    volumes: [pg-cdp:/var/lib/postgresql]
+
+volumes:
+  pg-crm:
+  pg-erp:
+  pg-media-ops:
+  pg-work-mgmt:
+  pg-adserver:
+  pg-cdp:

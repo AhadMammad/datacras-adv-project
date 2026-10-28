@@ -1,0 +1,111 @@
+# Per-table strictness rules, curated from the MVM descriptions.
+#   unique:   business/natural keys -> NOT NULL + UNIQUE (list of column lists)
+#   required: identifying attributes -> NOT NULL
+#   status:   primary lifecycle status column -> NOT NULL
+# Keys are "<mvm_domain>.<mvm_product>". Column names are OLTP names
+# (after audit renames). Unknown columns fail the build.
+
+campaign.budget_allocation:      {status: allocation_status}
+campaign.campaign:               {unique: [[campaign_code]], required: [campaign_name, start_date], status: campaign_status}
+campaign.campaign_kpi_target:    {status: target_status}
+campaign.flight:                 {unique: [[flight_code]], required: [flight_name, start_date, end_date], status: flight_status}
+campaign.pacing_rule:            {required: [rule_name], status: pacing_status}
+campaign.targeting_rule:         {required: [rule_name]}
+campaign.ad:                     {required: [ad_name], status: ad_status}
+campaign.creative_assignment:    {status: trafficking_status}
+campaign.line_item:              {unique: [[line_item_code]], required: [line_item_name, start_date, end_date], status: delivery_status}
+campaign.trafficking_order:      {unique: [[trafficking_order_number]], status: trafficking_status}
+
+creative.brand_guideline:        {required: [guideline_version, effective_date], status: guideline_status}
+creative.concept:                {unique: [[concept_code]], required: [title], status: concept_status}
+creative.creative_brief:         {unique: [[brief_number]], required: [brief_name], status: creative_brief_status}
+creative.spec:                   {unique: [[spec_code]], required: [spec_name], status: spec_status}
+creative.asset:                  {unique: [[dam_asset_ref]], required: [asset_name, asset_type]}
+creative.asset_version:          {required: [version_number], status: version_status}
+creative.creative_deliverable:   {unique: [[deliverable_code]], required: [deliverable_name], status: deliverable_status}
+creative.production_job:         {unique: [[job_number]], required: [job_name], status: job_status}
+creative.proof:                  {unique: [[proof_number]], required: [proof_name], status: proof_status}
+
+media.media_placement:           {unique: [[placement_code]], required: [placement_name], status: placement_status}
+media.plan:                      {unique: [[plan_number]], required: [plan_name], status: plan_status}
+media.plan_line:                 {required: [line_number, line_name], status: buying_status}
+media.schedule:                  {unique: [[schedule_number]], required: [schedule_name]}
+media.buy:                       {unique: [[buy_number]], status: buy_status}
+media.media_insertion_order:     {unique: [[io_number, version_number]], required: [io_name], status: io_status}
+media.programmatic_deal:         {unique: [[deal_code]], required: [deal_name], status: deal_status}
+media.trafficking_instruction:   {unique: [[instruction_number]], status: instruction_status}
+media.ad_channel:                {unique: [[channel_code]], required: [channel_name], status: channel_status}
+media.ad_format:                 {unique: [[format_code]], required: [format_name], status: format_status}
+media.placement:                 {unique: [[placement_code]], required: [placement_name], status: placement_status}
+media.publisher_property:        {unique: [[property_code]], required: [property_name], status: property_status}
+
+performance.attribution_model:       {unique: [[model_code]], required: [model_name], status: attribution_model_status}
+performance.conversion_event:        {status: conversion_status}
+performance.performance_kpi_target:  {required: [target_name], status: target_status}
+performance.tracking_pixel:          {unique: [[pixel_code]], required: [pixel_name], status: deployment_status}
+performance.click_event:             {}
+performance.delivery_pacing:         {required: [pacing_period_start, pacing_period_end], status: pacing_status}
+performance.impression_event:        {}
+performance.video_completion_event:  {}
+performance.viewability_measurement: {required: [measurement_date]}
+
+project.assignment:              {status: assignment_status}
+project.deliverable_tracker:     {required: [deliverable_name], status: deliverable_status}
+project.task:                    {required: [task_name], status: task_status}
+project.time_entry:              {required: [entry_date, hours_logged], status: approval_status}
+project.initiative:              {unique: [[project_code]], required: [initiative_name], status: initiative_status}
+project.milestone:               {required: [milestone_name], status: project_milestone_status}
+project.project_brief:           {required: [title], status: brief_status}
+project.project_budget:          {required: [total_approved_budget, currency_code], status: budget_status}
+project.resource_plan:           {status: plan_status}
+project.work_package:            {required: [wbs_code, work_package_name], status: work_package_status}
+
+vendor.invoice:                  {required: [vendor_reference_number], status: invoice_status}
+vendor.io_line:                  {required: [line_number], status: line_status}
+vendor.performance_evaluation:   {unique: [[evaluation_number]], status: evaluation_status}
+vendor.reconciliation:           {unique: [[reconciliation_number]], status: reconciliation_status}
+vendor.accreditation:            {required: [certification_name], status: accreditation_status}
+vendor.publisher:                {required: [publisher_type]}
+vendor.supplier:                 {required: [legal_name], status: onboarding_status}
+vendor.tech_partner:             {required: [platform_type]}
+vendor.vendor_rate_card:         {unique: [[rate_card_number, version]], required: [rate_card_name], status: rate_card_status}
+
+audience.behavioral_profile:     {required: [profile_name], status: profile_status}
+audience.demographic_profile:    {unique: [[profile_code]], required: [profile_name]}
+audience.persona:                {unique: [[persona_code]], required: [persona_name], status: persona_status}
+audience.segment:                {required: [audience_segment_name], status: audience_segment_status}
+audience.taxonomy:               {unique: [[taxonomy_code]], required: [category_name]}
+audience.activation:             {status: activation_status}
+audience.lookalike_model:        {required: [model_name], status: model_status}
+audience.segment_membership:     {required: [audience_identifier, identifier_type], status: membership_status}
+audience.suppression_list:       {unique: [[list_code]], required: [list_name], status: list_status}
+
+client.account_team:             {unique: [[assignment_code]], status: assignment_status}
+client.agency_relationship:      {unique: [[relationship_code]], status: relationship_status}
+client.client_brief:             {unique: [[brief_number]], required: [title], status: brief_status}
+client.revenue_target:           {unique: [[target_code]], required: [target_name], status: target_status}
+client.advertiser:               {required: [legal_entity_name], status: account_status}
+client.advertiser_hierarchy:     {unique: [[hierarchy_code]], required: [effective_start_date], status: hierarchy_status}
+client.brand:                    {unique: [[brand_code]], required: [brand_name], status: brand_status}
+
+contract.contract_deliverable:     {unique: [[deliverable_code]], required: [deliverable_name], status: contract_deliverable_status}
+contract.contract_insertion_order: {unique: [[io_number]], required: [io_name], status: io_status}
+contract.contract_rate_card:       {unique: [[rate_card_number, version_number]], required: [rate_card_name], status: contract_rate_card_status}
+contract.rate_card_line:           {status: line_status}
+contract.agreement:                {unique: [[agreement_number]], status: agreement_status}
+contract.amendment:                {required: [amendment_number], status: amendment_status}
+contract.renewal:                  {unique: [[renewal_number]], status: renewal_status}
+contract.sla:                      {unique: [[sla_code]], required: [sla_name], status: sla_status}
+contract.sow:                      {unique: [[sow_number, version_number]], required: [title], status: sow_status}
+contract.term:                     {required: [clause_title]}
+
+finance.budget_line:               {required: [line_number]}
+finance.cost_center:               {unique: [[cost_center_code]], required: [cost_center_name], status: cost_center_status}
+finance.finance_budget:            {unique: [[budget_number]], required: [budget_name]}
+finance.gl_account:                {unique: [[company_code, account_code]], required: [account_name], status: gl_account_status}
+finance.client_invoice:            {unique: [[invoice_number]], status: invoice_status}
+finance.invoice_line:              {required: [line_number], status: billing_status}
+finance.media_cost_reconciliation: {unique: [[reconciliation_document_number]], status: reconciliation_status}
+finance.payment:                   {unique: [[reference_number]], status: payment_status}
+finance.revenue_recognition:       {status: recognition_status}
+finance.vendor_payable:            {unique: [[payable_document_number]], status: payment_status}
