@@ -20,8 +20,6 @@ def invalid_values(schema, table, rows):
                 if v is None:
                     bad.append((table, c.name, v))
                 continue
-            if v is None and not c.nullable and c.default is not None:
-                continue  # database default fills it (booleans default false)
             if not valid(c, v):
                 bad.append((table, c.name, v))
             elif c.code_set and v is not None and v not in schema.code_values(table, c.name):

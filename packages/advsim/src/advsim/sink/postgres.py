@@ -57,8 +57,19 @@ class PgSink:
     def copy_dicts(self, table: str, rows: list[dict]) -> int:
         if not rows:
             return 0
-        cols = [c.name for c in self.s.table(table).columns]
-        return self.copy(table, cols, (tuple(r.get(c) for c in cols) for r in rows))
+        columns = self.s.table(table).columns
+        cols = [c.name for c in columns]
+        # COPY sends an explicit NULL, so column defaults never apply; NOT NULL booleans default to false
+        fallback = {i: False for i, c in enumerate(columns) if not c.nullable and c.pg_type == "boolean"}
+
+        def values(r: dict) -> tuple:
+            t = [r.get(c) for c in cols]
+            for i, v in fallback.items():
+                if t[i] is None:
+                    t[i] = v
+            return tuple(t)
+
+        return self.copy(table, cols, (values(r) for r in rows))
 
     def execute(self, db: str, query, params=None) -> None:
         self.conn(db).execute(query, params)

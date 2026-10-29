@@ -296,7 +296,7 @@ class Engine:
                 conn.commit()
                 self.w.reg.remove(table, row)
                 self.stats["deletes"] += 1
-            except errors.ForeignKeyViolation:
+            except (errors.ForeignKeyViolation, errors.RestrictViolation):  # still referenced: keep it
                 conn.rollback()
 
     def flush(self) -> None:

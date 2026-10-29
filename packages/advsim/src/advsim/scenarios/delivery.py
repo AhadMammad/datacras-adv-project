@@ -279,6 +279,8 @@ class EventWriter:
             "video_player_size": rnd.weighted(["large", "medium", "fullscreen", "small"], [4, 3, 2, 1]) if li.kind in VIDEO_KINDS else None,
             "viewability_percentage": round(rnd.uniform(50, 100), 2) if viewable else round(rnd.uniform(0, 49), 2),
             "viewability_status": ("viewable" if viewable else "non_viewable") if li.kind not in ("audio", "dooh") else "not_measured",
+            "is_autoplay": li.kind in VIDEO_KINDS and rnd.chance(0.6), "is_bot_traffic": rnd.chance(0.012),
+            "is_muted": li.kind in VIDEO_KINDS and device != "ctv" and rnd.chance(0.55),
         }
         self.audit(row, ingest, "cm360_ingest")
         row["_device"] = device
@@ -305,6 +307,7 @@ class EventWriter:
             "device_type": imp["device_type"], "geographic_city": imp["geo_city"], "geographic_country_code": "USA",
             "geographic_region": imp["geo_region"], "ip_address": imp["ip_address"],
             "ivt_detection_method": "general_ivt" if invalid else None, "referrer_url": imp["page_url"], "user_agent": imp["user_agent"],
+            "conversion_attributed_flag": False, "tracking_pixel_fired_flag": rnd.chance(0.92),
         }
         self.audit(row, ts + timedelta(seconds=rnd.int(1, 60)), "cm360_ingest")
         return row
@@ -336,7 +339,10 @@ class EventWriter:
             "ip_address": src.get("ip_address"), "landing_page_url": f"https://www.{adv.domain}/",
             "operating_system": rnd.weighted(pools.OPERATING_SYSTEMS), "order_reference": f"ORD-{rnd.int(10**7, 10**8 - 1)}" if ctype == "purchase" else None,
             "product_category": adv.industry, "referrer_url": None, "user_identifier": src.get("user_identifier") or src.get("device_fingerprint"),
+            "is_duplicate": False,
         }
+        if kind == "click_through":
+            src["conversion_attributed_flag"] = True
         self.audit(row, ts + timedelta(minutes=rnd.int(1, 30)), "floodlight_ingest")
         return row
 
@@ -367,6 +373,9 @@ class EventWriter:
             "time_to_completion_seconds": dur if q == 4 else None, "user_id_hashed": imp["user_identifier"], "vast_version": "4.2",
             "video_duration_seconds": dur, "video_format": "linear", "video_position": rnd.weighted(["pre_roll", "mid_roll", "post_roll"], [6, 3, 1]),
             "viewable_percentage": imp["viewability_percentage"], "vpaid_version": None,
+            "is_autoplay": imp["is_autoplay"], "is_fullscreen": size == "fullscreen",
+            "is_skipped": q < 4 and li.kind == "video" and rnd.chance(0.5), "is_sound_on": not imp["is_muted"],
+            "is_viewable": imp["viewability_status"] == "viewable",
         }
         self.audit(row, ts + timedelta(seconds=rnd.int(1, 90)), "cm360_ingest")
         return row
@@ -394,6 +403,9 @@ class EventWriter:
             "unmeasurable_reason": None if day.measurable else "Audio or out-of-home inventory",
             "video_quartile_reached": "100%" if li.kind in VIDEO_KINDS else "not_applicable", "viewability_rate": round(min(100, rate), 2),
             "viewability_standard": "MRC_video" if li.kind in VIDEO_KINDS else "MRC_display", "viewable_impression_count": day.viewable,
+            "audible_on_complete_flag": li.kind in ("ctv", "audio"), "brand_safety_flag": rnd.chance(0.03),
+            "invalid_traffic_flag": rnd.chance(0.05), "mrc_compliant_flag": bool(day.measurable),
+            "viewability_guaranteed_io_flag": li.deal is not None and li.kind in VIDEO_KINDS + ("display",),
         }
         self.audit(row, ts + timedelta(hours=rnd.int(2, 8)), "verification_import")
         return row
@@ -435,6 +447,8 @@ class EventWriter:
             "recommended_budget_adjustment": None, "source_record_reference": f"{li.row['line_item_code']}:{d:%Y%m%d}",
             "spend_pacing_percentage": round(min(100, ratio * 100), 2),
             "viewability_rate": round(day.viewable / day.measurable * 100, 2) if day.measurable else None,
+            "frequency_cap_reached": rnd.chance(0.04), "is_active": d < li.end,
+            "pacing_alert_triggered": status in ("under_delivering", "over_delivering"),
         }
         self.audit(row, ts + timedelta(minutes=rnd.int(5, 90)), "pacing_job")
         return row
