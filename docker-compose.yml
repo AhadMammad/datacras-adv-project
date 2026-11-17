@@ -39,6 +39,33 @@ services:
     ports: ["5438:5432"]
     volumes: [pg-cdp:/var/lib/postgresql]
 
+  # Simulator: backfills once if a database holds no data, then streams live activity.
+  # Opt-in (profile "sim"), so `docker compose up` and scripts/verify.sh start only the databases.
+  # Deploy the DDL first (make deploy), then: make sim-up. ADVSIM_ARGS holds the `serve` options.
+  advsim:
+    profiles: [sim]
+    build:
+      context: .
+      dockerfile: packages/advsim/Dockerfile
+    image: advsim:local
+    init: true
+    restart: on-failure:3
+    command: serve ${ADVSIM_ARGS:-}
+    environment:
+      CRM_DB_URL: postgresql://postgres:${PGPASSWORD:-postgres}@pg-crm:5432/crm_db
+      ERP_DB_URL: postgresql://postgres:${PGPASSWORD:-postgres}@pg-erp:5432/erp_db
+      MEDIA_OPS_DB_URL: postgresql://postgres:${PGPASSWORD:-postgres}@pg-media-ops:5432/media_ops_db
+      WORK_MGMT_DB_URL: postgresql://postgres:${PGPASSWORD:-postgres}@pg-work-mgmt:5432/work_mgmt_db
+      ADSERVER_DB_URL: postgresql://postgres:${PGPASSWORD:-postgres}@pg-adserver:5432/adserver_db
+      CDP_DB_URL: postgresql://postgres:${PGPASSWORD:-postgres}@pg-cdp:5432/cdp_db
+    depends_on:
+      pg-crm: {condition: service_healthy}
+      pg-erp: {condition: service_healthy}
+      pg-media-ops: {condition: service_healthy}
+      pg-work-mgmt: {condition: service_healthy}
+      pg-adserver: {condition: service_healthy}
+      pg-cdp: {condition: service_healthy}
+
 volumes:
   pg-crm:
   pg-erp:

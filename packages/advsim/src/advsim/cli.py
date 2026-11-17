@@ -2,6 +2,7 @@
 
   advsim backfill --profile small [--start 2026-01-01] [--end now] [--seed 42] [--reset] [--workers N]
   advsim run      --profile small [--speed 1] [--duration 2h]
+  advsim serve    --profile small [--speed 1]     (container: backfill if a database is empty, then run)
   advsim reset    [--db crm_db ...]
   advsim validate [--orphan-tolerance 0.0]
   advsim stats
@@ -50,7 +51,7 @@ def require_dbs(sink: PgSink) -> None:
     if bad:
         for db, msg in bad.items():
             print(f"cannot reach {db}: {msg}", file=sys.stderr)
-        sys.exit("start the databases first: scripts/verify.sh --keep (or docker compose up -d + deploy DDL)")
+        sys.exit("start the databases first: make deploy (or scripts/verify.sh --keep)")
 
 
 def cmd_backfill(a) -> None:
@@ -87,6 +88,27 @@ def cmd_run(a) -> None:
     require_dbs(sink)
     seed = a.seed if a.seed is not None else int(time.time())
     Engine(settings, schema, sink, a.speed, seed).run(parse_duration(a.duration))
+
+
+def cmd_serve(a) -> None:
+    """Container entry point. A database with no data means a fresh deploy or an interrupted load,
+    so the whole world is backfilled again (--reset keeps cross-database references coherent)."""
+    settings = load_settings(a.profile, parse_dq(a.dq))
+    schema = Schema()
+    sink = PgSink(schema, settings.urls)
+    require_dbs(sink)
+    missing = [db for db in schema.systems if not sink.deployed(db)]
+    if missing:
+        sys.exit(f"tables missing in {', '.join(missing)}: deploy the DDL first (make deploy)")
+    empty = [db for db in schema.systems if not sink.has_rows(db)]
+    sink.close()
+    if empty:
+        print(f"no data in {', '.join(empty)}: backfilling profile {a.profile}", flush=True)
+        cmd_backfill(argparse.Namespace(profile=a.profile, start=None, end="now", seed=a.seed, reset=True,
+                                        workers=a.workers, dq=a.dq, dry_run=False))
+    else:
+        print("databases hold data: skipping backfill", flush=True)
+    cmd_run(argparse.Namespace(profile=a.profile, speed=a.speed, duration=None, seed=a.seed, dq=a.dq))
 
 
 def cmd_reset(a) -> None:
@@ -148,6 +170,14 @@ def main() -> None:
     r.add_argument("--seed", type=int)
     r.add_argument("--dq", action="append", metavar="KEY=VALUE")
     r.set_defaults(func=cmd_run)
+
+    sv = sub.add_parser("serve", help="container mode: backfill if a database is empty, then run until stopped")
+    sv.add_argument("--profile", default="small")
+    sv.add_argument("--speed", type=float, default=1.0)
+    sv.add_argument("--seed", type=int)
+    sv.add_argument("--workers", type=int, default=1, help="parallel processes for the backfill's event loading")
+    sv.add_argument("--dq", action="append", metavar="KEY=VALUE")
+    sv.set_defaults(func=cmd_serve)
 
     x = sub.add_parser("reset", help="truncate source tables (ref code sets are kept)")
     x.add_argument("--db", action="append", help="limit to these databases")

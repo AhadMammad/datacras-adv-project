@@ -96,6 +96,18 @@ class PgSink:
             c.execute(sql.SQL("TRUNCATE {} CASCADE").format(names))
             c.commit()
 
+    def deployed(self, db: str) -> bool:
+        """True when every data table of the model exists (the DDL has been applied)."""
+        names = [f"{s}.{n}" for s, n in self.data_tables(db)]
+        found = self.fetch(db, "SELECT count(to_regclass(n)) FROM unnest(%s::text[]) n", (names,))[0][0]
+        return found == len(names)
+
+    def has_rows(self, db: str) -> bool:
+        """True when any data table holds a row; one EXISTS probe per table, so cheap on large tables."""
+        probes = sql.SQL(" OR ").join(
+            sql.SQL("EXISTS (SELECT 1 FROM {})").format(sql.Identifier(s, n)) for s, n in self.data_tables(db))
+        return self.fetch(db, sql.SQL("SELECT ") + probes)[0][0]
+
     def counts(self, db: str) -> dict[str, int]:
         c = self.conn(db)
         out = {}

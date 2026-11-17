@@ -82,6 +82,10 @@ psql -d postgres -f models/physical/crm_db/ddl/000_database.sql
 for f in models/physical/crm_db/ddl/0[1-9]*.sql; do psql -v ON_ERROR_STOP=1 -d crm_db -f "$f"; done
 ```
 
+The `Makefile` wraps these and the simulator commands below; `make` lists the targets. `make demo`
+deploys all six databases, backfills the `tiny` profile, validates and prints row counts. Options are
+variables, for example `make backfill PROFILE=medium WORKERS=4` or `make run SPEED=60 DURATION=10m`.
+
 Optional checks on the docs:
 
 ```bash
@@ -104,6 +108,16 @@ uv run advsim backfill --profile small --reset             # history from 2026-0
 uv run advsim validate                                     # soft refs resolve, business invariants hold
 uv run advsim stats                                        # row counts per database/table
 uv run advsim run --profile small --speed 60               # live activity until Ctrl-C (or --duration 2h)
+```
+
+**In Docker.** The `advsim` compose service (opt-in profile `sim`, image built from
+[packages/advsim/Dockerfile](packages/advsim/Dockerfile)) runs `advsim serve`: if any database holds
+no data it backfills the profile with `--reset`, then streams until stopped. Deploy the DDL first.
+
+```bash
+make deploy                              # stops the simulator, recreates the databases
+make sim-up PROFILE=small SPEED=60       # backfill if empty, then stream; make sim-logs / sim-down
+make stats DOCKER=1                      # any simulator target inside the container
 ```
 
 **Backfill** builds the world in memory, loads it in foreign-key order with `COPY`, and then writes
